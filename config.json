@@ -1,0 +1,12 @@
+{
+    "channel" : " ",
+    "mudae" : {
+        "on" : false,
+        "daily" : false,
+        "poke" : false,
+        "dk" : false,
+        "serv_dk" : [],
+        "autoclaim" : false,
+        "serv_autoclaim" : []
+    }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "koya",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "author": "speeckby",
+  "license": "MIT",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "discord.js-selfbot-v13": "^3.1.4",
+    "dotenv": "^16.3.1",
+    "figlet": "^1.7.0",
+    "sqlite3": "^5.1.7"
+  }
+}
