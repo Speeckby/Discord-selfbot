@@ -1,21 +1,14 @@
 const loadCommands = require("../loaders/loadCommands.js")
-const https = require('https');
-const Mudae = require("./timers/mudae");
+const Mudae = require("../timers/mudae.js");
 
   
 function verifier_timers(client) {
-  for (let i=0;i < client.var.timers.length; i++) {
-    client.var.timers[i].then(function(valeur) {
-        if (valeur[3] < Date.now()) {
-            const channel = client.channels.cache.get(valeur[4]);
-            channel.send({
-                content: valeur[2]
-            });
-            valeur[3] += valeur[5]
-        }
-    }).catch(function(erreur) {
-        console.error("Une erreur s'est produite :", erreur);
-    });
+  value =a.verifier_timer()
+  if (value != undefined) {
+    const channel = client.channels.cache.get("1099737720026300576");
+    channel.send({
+       content: value
+     })
   }
 }
 
@@ -32,11 +25,16 @@ module.exports = async client => {
     
     setTimeout(() => {
       client.fn.log(client, "LOADERS", `${client.user.tag} online`)
+
   }, 4000)
   
   
   a = new Mudae("1","10","6h 02")
-  while (true) {
-      a.verifier_timer(client)
+  function timers() {
+    setTimeout(() => {
+      verifier_timers(client);
+      setTimeout(timers, 30000 + Math.floor(Math.random() * 100));
+    }, 10);
   }
+  timers()
 }

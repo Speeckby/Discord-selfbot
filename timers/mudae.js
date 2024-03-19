@@ -19,35 +19,34 @@ module.exports = class Mudae {
         }
     }
 
-    creer_ordre() {
-        var ordre = [
-            { name: "daily", value: this.next_daily, function : (client) => this.daily(client)},
-            { name: "pokemon", value: this.next_pokemon, function : (client) => this.pokemon(client)},
-            { name: "vote", value: this.next_vote, function : (client) => this.vote(client)},
-        ].sort((a, b) => a.value - b.value);
-        return ordre
-    }
-
-    verifier_timer(client) {
-        if (this.time + this.ordre[0].value < Date.now()) {
-            this.ordre[0].function(client)
-            console.log(this.ordre)
+    creer_ordre(creer = false) {
+        if (creer == false) {
+            var ordre = [
+                { name: "daily", value: this.next_daily, function : () => this.daily()},
+                { name: "pokemon", value: this.next_pokemon, function : () => this.pokemon()},
+                { name: "vote", value: this.next_vote, function : () => this.vote()},
+            ].sort((a, b) => a.value - b.value);
+            return ordre
         } else {
-            return 
+            this.ordre.sort((a, b) => a.value - b.value);
         }
     }
 
-    daily(client) {
-        console.log(client.channels)
-        const channel = client.channels.cache.get("1099737720026300576");
-        console.log(channel)
-        delete this.ordre[0]
+    verifier_timer() {
+        if (this.time + this.ordre[0].value < Date.now()) {
+            return this.ordre[0].function()
+        } 
+    }
+
+    daily() {
+        this.ordre.splice(0, 1)
         for (let i=0; i<this.ordre.length; i++) {
-            this.ordre[i].value += this.time - Date.now()
+            this.ordre[i]["value"] -=  Date.now() - this.time
         }
         this.time = Date.now()
-        this.next_daily = 100000
-        this.ordre.push({ name: "daily", value: this.next_daily, function :() => this.daily()})
+        this.ordre.push({ name: "daily", value: 72000000, function :() => this.daily()})
+        this.creer_ordre(true)
+        return '$daily'
     }
 
     pokemon() {
