@@ -1,15 +1,23 @@
 const config = require("../config.json");
 
 module.exports = class Mudae {
-    constructor(next_daily, next_pokemon,next_vote) {
+    constructor(message) {
         this.channel = config.channel
-        this.next_daily = this.calcul_time(next_daily)
-        this.next_pokemon = this.calcul_time(next_pokemon)
-        this.next_vote = this.calcul_time(next_vote)
-        this.ordre = this.creer_ordre()
-        this.time = Date.now()
+        console.log(this.recuperer_infos(message))
     }
 
+    recuperer_infos(message) {
+        let next_daily = ""
+        if (message.includes("$daily est disponible !")) {
+            next_daily = 0
+        } else {
+            next_daily = message.split("$daily reset dans ")[1].split("min.")[0].split("**")
+            next_daily = this.calcul_time(next_daily[1])
+        }
+
+        return next_daily
+    }
+    
     calcul_time(time) {
         if (isNaN(time)) {
             time = time.split("h ")
