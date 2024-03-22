@@ -1,7 +1,7 @@
 {
-    "channel" : "1201851784075943957",
+    "channel" : "",
     "mudae" : {
-        "on" : true,
+        "on" : false,
         "daily" : false,
         "poke" : false,
         "dk" : false,

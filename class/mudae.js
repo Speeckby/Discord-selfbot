@@ -7,15 +7,30 @@ module.exports = class Mudae {
     }
 
     recuperer_infos(message) {
-        let next_daily = ""
-        if (message.includes("$daily est disponible !")) {
-            next_daily = 0
-        } else {
-            next_daily = message.split("$daily reset dans ")[1].split("min.")[0].split("**")
-            next_daily = this.calcul_time(next_daily[1])
-        }
+        let next_daily = false
+        let next_poke = false
+        let next_dk = false
 
-        return next_daily
+        if (config.mudae.daily) {
+            if (message.includes("$daily est disponible !")) {
+                next_daily = 0
+            } else {
+                next_daily = message.split("$daily reset dans ")[1].split("min.")[0].split("**")
+                next_daily = this.calcul_time(next_daily[1])
+            }
+        }
+        
+        if (config.mudae.poke) {
+            if (message.includes("$p est disponible !")) {
+                next_poke = 0
+            } else {
+                next_poke = message.split("$p : ")[1].split("min.")[0].split("**")
+                next_poke = this.calcul_time(next_poke[1])
+            }
+        }
+        
+
+        return next_daily, next_poke
     }
     
     calcul_time(time) {
@@ -58,7 +73,14 @@ module.exports = class Mudae {
     }
 
     pokemon() {
-
+        this.ordre.splice(0, 1)
+        for (let i=0; i<this.ordre.length; i++) {
+            this.ordre[i]["value"] -=  Date.now() - this.time
+        }
+        this.time = Date.now()
+        this.ordre.push({ name: "pokemon", value: 72000000, function :() => this.pokemon()})
+        this.creer_ordre(true)
+        return '$p'
     }
 
     vote() {
