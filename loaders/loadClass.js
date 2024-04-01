@@ -1,6 +1,6 @@
 const config = require("../config.json");
 
-module.exports = client => {
+module.exports = async client => {
     
     client.class = new Object()
     
@@ -8,17 +8,15 @@ module.exports = client => {
         const Mudae = require("../class/mudae");
         const channel = client.channels.cache.get(config.channel)
         
-      
         channel.send("$tu")
-        setInterval(() => {
-        if (!("mudae" in client.class)) {
-            channel.send("$tu")
-        }else {
-            return;
-            }
-        }, 3000)    
         
-          
-        client.class.mudae = new Mudae(client.class.mudae)
+        const interval = await setInterval(() => {
+            if (!("mudae" in client.class)) {
+                channel.send("$tu")
+            }else {
+                client.class.mudae = new Mudae(client.class.mudae)
+                clearInterval(interval);
+                }
+        }, 3000)    
     }
 }

@@ -37,7 +37,6 @@ const loadEvents = require("./loaders/loadEvents.js")
 const client = new Discord.Client();
 
 client.login(process.env.TOKEN)
-client.commands = new Discord.Collection()
 client.color = "#a14ca8"
 client.mudae = undefined
 
