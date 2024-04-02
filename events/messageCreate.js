@@ -15,9 +15,7 @@ module.exports = async (client, message) => {
         }else if (message.embeds.length == 1){
             if (parseInt(message.embeds[0].description.split("\n")[3].split("**")[1]) > 200) {
                 console.log('gg')
-                message.react("🙂")
-            } else {
-                console.log(message.embeds[0].description.split("\n")[3].split("**")[1])
+                message.clickButton({ Y : 0, X : 0})
             }
         }
         
