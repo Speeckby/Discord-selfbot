@@ -1,5 +1,3 @@
-const { Button } = require("discord.js-selfbot-v13");
-
 module.exports = async (client, message) => {
     
     if (message.author.id == 1020053727677263892 || message.author.id == 665551706645594123) {
@@ -14,12 +12,14 @@ module.exports = async (client, message) => {
             
             } 
         
-        }else if (message.embeds.footer != null){
-            if (parseInt(message.embeds[0].footer.text.split("-")[1].split(" ")[1]) > 300 ) {
-                message.react("🐀")
+        }else if (message.embeds.length == 1){
+            if (parseInt(message.embeds[0].description.split("\n")[3].split("**")[1]) > 200) {
+                console.log('gg')
+                message.react("🙂")
             } else {
-                console.log(message.embeds[0].footer.text.split("-")[1].split(" ")[1])
+                console.log(message.embeds[0].description.split("\n")[3].split("**")[1])
             }
         }
+        
     }
 }

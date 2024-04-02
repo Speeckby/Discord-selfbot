@@ -3,13 +3,18 @@ const config = require("../config.json");
 module.exports = class Mudae {
     constructor(message) {
         this.channel = config.channel
-        console.log(this.recuperer_infos(message))
+        let val = this.recuperer_infos(message)
+        this.next_daily = val[0]
+        this.next_poke = val[1]
+        this.next_roll = val[2]
+        this.ordre = this.creer_ordre()
+        this.time = Date.now()
     }
 
     recuperer_infos(message) {
         let next_daily = false
         let next_poke = false
-        let next_dk = false
+        let next_roll = false 
 
         if (config.mudae.daily) {
             if (message.includes("$daily est disponible !")) {
@@ -17,6 +22,14 @@ module.exports = class Mudae {
             } else {
                 next_daily = message.split("$daily reset dans ")[1].split("min.")[0].split("**")
                 next_daily = this.calcul_time(next_daily[1])
+            }
+        }
+        if (config.mudae.autoclaim) {
+            if (message.split("avez")[1].split(" ")[1] > 0) {
+                next_roll = 0
+            } else {
+                next_roll = message.split("Prochain rolls reset dans ")[1].split("min.")[0].split("**")
+                next_roll = this.calcul_time(next_roll[1])%3600000
             }
         }
         
@@ -30,7 +43,7 @@ module.exports = class Mudae {
         }
         
 
-        return next_daily, next_poke
+        return [ next_daily, next_poke, next_roll ]
     }
     
     calcul_time(time) {
@@ -45,9 +58,9 @@ module.exports = class Mudae {
     creer_ordre(creer = false) {
         if (creer == false) {
             var ordre = [
-                { name: "daily", value: this.next_daily, function : () => this.daily()},
-                { name: "pokemon", value: this.next_pokemon, function : () => this.pokemon()},
-                { name: "vote", value: this.next_vote, function : () => this.vote()},
+                { name : "roll", value: this.next_roll, function : (client) => this.roll(client)},
+                { name : "daily", value: this.next_daily, function : () => this.daily()},
+                { name : "pokemon", value: this.next_poke, function : () => this.pokemon()}
             ].sort((a, b) => a.value - b.value);
             return ordre
         } else {
@@ -55,10 +68,13 @@ module.exports = class Mudae {
         }
     }
 
-    verifier_timer() {
+    verifier_timer(client) {
         if (this.time + this.ordre[0].value < Date.now()) {
-            return this.ordre[0].function()
+            return this.ordre[0].function(client)
         } 
+        else {
+            return this.ordre[0].value
+        }
     }
 
     daily() {
@@ -83,7 +99,22 @@ module.exports = class Mudae {
         return '$p'
     }
 
-    vote() {
+    roll(client) {
+        this.ordre.splice(0, 1)
+        for (let i=0; i<this.ordre.length; i++) {
+            this.ordre[i]["value"] -=  Date.now() - this.time
+        }
+        this.time = Date.now()
+        this.ordre.push({ name: "roll", value: 3600000, function :() => this.roll()})
+        this.creer_ordre(true)
+        this.rolls(12,client)
+        return 'flop';
+    }
 
+    rolls(number,client) {
+        const channel = client.channels.cache.get(config.channel)
+        for (let i = 0; i<number;  i++) {
+            channel.sendSlash('432610292342587392', 'ma')
+        }
     }
 }

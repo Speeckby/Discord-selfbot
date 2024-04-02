@@ -1,5 +1,5 @@
 const config = require("../config.json");
-
+const fn = require('../fn/roll.js')
 module.exports = async client => {
     
     client.class = new Object()
@@ -16,6 +16,7 @@ module.exports = async client => {
             }else {
                 client.class.mudae = new Mudae(client.class.mudae)
                 clearInterval(interval);
+                fn(client)
                 }
         }, 3000)    
     }
