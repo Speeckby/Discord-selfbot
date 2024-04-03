@@ -25,7 +25,7 @@ module.exports = class Mudae {
             }
         }
         if (config.mudae.autoclaim) {
-            if (message.split("avez")[1].split(" ")[1] > 0) {
+            if (message.includes("Vous avez **12** rolls restants.")) {
                 next_roll = 0
             } else {
                 next_roll = message.split("Prochain rolls reset dans ")[1].split("min.")[0].split("**")
@@ -105,7 +105,7 @@ module.exports = class Mudae {
             this.ordre[i]["value"] -=  Date.now() - this.time
         }
         this.time = Date.now()
-        this.ordre.push({ name: "roll", value: 3600000, function :() => this.roll()})
+        this.ordre.push({ name: "roll", value: 3600000, function :(client) => this.roll(client)})
         this.creer_ordre(true)
         this.rolls(12,client)
         return 'flop';

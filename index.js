@@ -38,6 +38,5 @@ const client = new Discord.Client();
 
 client.login(process.env.TOKEN)
 client.color = "#a14ca8"
-client.mudae = undefined
 
 loadEvents(client)
