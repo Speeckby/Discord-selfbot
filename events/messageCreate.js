@@ -13,7 +13,7 @@ module.exports = async (client, message) => {
             } 
         
         }else if (message.embeds.length == 1){
-            if (parseInt(message.embeds[0].description.split("\n")[3].split("**")[1]) > 200) {
+            if (parseInt(message.embeds[0].description.split("\n")[3].split("**")[1]) > 200 || message.content != "" || message.embeds[0].iconURL) {
                 console.log('gg')
                 message.clickButton({ Y : 0, X : 0})
             }
