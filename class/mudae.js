@@ -114,7 +114,11 @@ module.exports = class Mudae {
     rolls(number,client) {
         const channel = client.channels.cache.get(config.channel)
         for (let i = 0; i<number;  i++) {
-            channel.sendSlash('432610292342587392', 'ma')
+            try {
+                channel.sendSlash('432610292342587392', 'ma')
+            } catch (e) {
+                number += 1 
+            }
         }
     }
 }

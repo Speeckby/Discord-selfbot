@@ -13,9 +13,18 @@ module.exports = async (client, message) => {
             } 
         
         }else if (message.embeds.length == 1){
-            if (parseInt(message.embeds[0].description.split("\n")[3].split("**")[1]) > 200 || message.content != "" || message.embeds[0].iconURL) {
+
+            // Si wish ou perso à + 200 kakeras
+
+            if (parseInt(message.embeds[0].description.split("\n")[3].split("**")[1]) > 200 || message.content != "") {
                 console.log('gg')
                 message.clickButton({ Y : 0, X : 0})
+            
+            } else if (message.embeds[0].footer) {
+                if (message.embeds[0].footer.iconURL) { // si react kakera 
+                    console.log('kakera')
+                    message.clickButton({ Y : 0, X : 0})
+                }
             }
         }
         
