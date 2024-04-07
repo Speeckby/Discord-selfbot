@@ -22,4 +22,3 @@
 ## Bugs connus : 
 
 * Erreur lors du roll de Mudae-chan
-* Erreur lors d'erreur d'envoi de commande

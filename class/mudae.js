@@ -111,13 +111,13 @@ module.exports = class Mudae {
         return 'flop';
     }
 
-    rolls(number,client) {
+    async rolls(number,client) {
         const channel = client.channels.cache.get(config.channel)
-        for (let i = 0; i<number;  i++) {
+        for (let i = 0; i < number; i++) {
             try {
-                channel.sendSlash('432610292342587392', 'ma')
-            } catch (e) {
-                number += 1 
+                await channel.sendSlash('432610292342587392', 'ma');
+            } catch {
+                number += 1;
             }
         }
     }
