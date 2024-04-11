@@ -29,12 +29,32 @@ text('Discord - Selfbot', {
 
 });
 
-const Discord = require('discord.js-selfbot-v13')
+const {Client, Options} = require('discord.js-selfbot-v13')
 require('dotenv').config()
 
 const loadEvents = require("./loaders/loadEvents.js")
 
-const client = new Discord.Client();
+const client = new Client({
+    makeCache: Options.cacheWithLimits({
+		...Options.DefaultMakeCacheSettings,
+		ReactionManager: 0,
+		GuildMemberManager: {
+			maxSize: 100,
+			keepOverLimit: member => member.id === member.client.user.id,
+		},
+	}),
+    sweepers: {
+		...Options.DefaultSweeperSettings,
+		messages: {
+			interval: 3_600, // Every hour.
+			lifetime: 1_800, // Remove messages older than 30 minutes.
+		},
+		users: {
+			interval: 3_600, // Every hour.
+			filter: () => user => user.bot && user.id !== user.client.user.id, // Remove all bots.
+		},
+	},
+});
 
 client.login(process.env.TOKEN)
 client.color = "#a14ca8"

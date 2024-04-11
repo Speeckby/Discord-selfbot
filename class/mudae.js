@@ -25,7 +25,7 @@ module.exports = class Mudae {
             }
         }
         if (config.mudae.autoclaim) {
-            if (message.includes("Vous avez **12** rolls restants.")) {
+            if (message.includes("Vous avez **15** rolls restants.")) {
                 next_roll = 0
             } else {
                 next_roll = message.split("Prochain rolls reset dans ")[1].split("min.")[0].split("**")
@@ -94,7 +94,7 @@ module.exports = class Mudae {
             this.ordre[i]["value"] -=  Date.now() - this.time
         }
         this.time = Date.now()
-        this.ordre.push({ name: "pokemon", value: 72000000, function :() => this.pokemon()})
+        this.ordre.push({ name: "pokemon", value: 7200000, function :() => this.pokemon()})
         this.creer_ordre(true)
         return '$p'
     }
@@ -107,8 +107,8 @@ module.exports = class Mudae {
         this.time = Date.now()
         this.ordre.push({ name: "roll", value: 3600000, function :(client) => this.roll(client)})
         this.creer_ordre(true)
-        this.rolls(12,client)
-        return 'flop';
+        this.rolls(17,client)
+        return '^ a';
     }
 
     async rolls(number,client) {
@@ -116,9 +116,10 @@ module.exports = class Mudae {
         for (let i = 0; i < number; i++) {
             try {
                 await channel.sendSlash('432610292342587392', 'ma');
-            } catch {
-                number += 1;
+            } catch (e) {
+                console.error('Error message:', e);       
             }
         }
+        console.log('All messages sent successfully.');
     }
 }
