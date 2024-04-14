@@ -7,6 +7,7 @@ module.exports = class Mudae {
         this.next_daily = val[0]
         this.next_poke = val[1]
         this.next_roll = val[2]
+        this.claim_reset = val[3]
         this.ordre = this.creer_ordre()
         this.time = Date.now()
     }
@@ -15,6 +16,7 @@ module.exports = class Mudae {
         let next_daily = false
         let next_poke = false
         let next_roll = false 
+        let next_claim = false
 
         if (config.mudae.daily) {
             if (message.includes("$daily est disponible !")) {
@@ -25,11 +27,22 @@ module.exports = class Mudae {
             }
         }
         if (config.mudae.autoclaim) {
-            if (message.includes("Vous avez **15** rolls restants.")) {
+            if (message.includes("Vous avez **17** rolls restants.")) {
                 next_roll = 0
             } else {
                 next_roll = message.split("Prochain rolls reset dans ")[1].split("min.")[0].split("**")
-                next_roll = this.calcul_time(next_roll[1])%3600000
+                next_roll = this.calcul_time(next_roll[1])
+                next_claim = next_roll/3600000
+                if (next_claim == 1 ) {
+                    next_claim = 0
+                } else if (next_claim == 2 ) {
+                    next_claim = 1
+                } else if (next_claim == 3) {
+                    next_claim = 2
+                } else {
+                    next_claim = Math.floor(next_claim)
+                }
+                next_roll = next_roll%3600000
             }
         }
         
@@ -43,7 +56,7 @@ module.exports = class Mudae {
         }
         
 
-        return [ next_daily, next_poke, next_roll ]
+        return [ next_daily, next_poke, next_roll, next_claim ]
     }
     
     calcul_time(time) {
@@ -107,17 +120,35 @@ module.exports = class Mudae {
         this.time = Date.now()
         this.ordre.push({ name: "roll", value: 3600000, function :(client) => this.roll(client)})
         this.creer_ordre(true)
-        this.rolls(17,client)
-        return '^ a';
+        this.rolls(17, client)
+        return ;
     }
 
-    async rolls(number,client) {
+    async rolls(number, client) {
         const channel = client.channels.cache.get(config.channel)
         for (let i = 0; i < number; i++) {
             try {
-                await channel.sendSlash('432610292342587392', 'ma');
+                let roll = await channel.sendSlash('432610292342587392', 'ma');
+
+                if (parseInt(roll.embeds[0].description.split("\n")[3].split("**")[1]) > 200 || roll.content != "") {
+                    console.log('gg')
+
+                    for (let j = 0; j <= roll.components.components.length; j ++) {
+                        roll.clickButton({ Y : j, X : 0})
+                    }
+                    
+                } else if (roll.embeds[0].footer) {
+                    if (roll.embeds[0].footer.iconURL) { // si react kakera 
+                        console.log('kakera')
+                        
+                        for (let j = 0; j <= roll.components.components.length; j ++) {
+                            roll.clickButton({ Y : j, X : 0})
+                        }
+                    }
+                }
             } catch (e) {
-                console.error('Error message:', e);       
+                console.error('Error message:', e);     
+                number += 1  
             }
         }
         console.log('All messages sent successfully.');

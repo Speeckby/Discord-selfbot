@@ -21,6 +21,6 @@
 
 ## Bugs connus : 
 
-* Ram utilisée en constante augmentation ⚠️ (peut-être réglé)
+* Ram utilisée en constante augmentation ⚠️ (Start = 100 Mib --> 500 Mib en 2 jours)
 * Erreur lors du claim d'un personnage avant le $tu
 * Erreur lors du roll de Mudae-chan
