@@ -129,26 +129,29 @@ module.exports = class Mudae {
         for (let i = 0; i < number; i++) {
             try {
                 let roll = await channel.sendSlash('432610292342587392', 'ma');
-
-                if (parseInt(roll.embeds[0].description.split("\n")[3].split("**")[1]) > 200 || roll.content != "") {
+                let value = parseInt(roll.embeds[0].description.split("\n")[3].split("**")[1]);
+				console.log(i ,typeof roll)
+                if (value > 200 || roll.content != "") {
                     console.log('gg')
-
-                    for (let j = 0; j <= roll.components.components.length; j ++) {
-                        roll.clickButton({ Y : j, X : 0})
+                    if (roll.components[0]){
+                        for (let j = 0; j <= roll.components[0].components.length; j ++) {
+                        	roll.clickButton({ Y : j, X : 0})
+                   	 	}
                     }
-                    
                 } else if (roll.embeds[0].footer) {
                     if (roll.embeds[0].footer.iconURL) { // si react kakera 
                         console.log('kakera')
                         
-                        for (let j = 0; j <= roll.components.components.length; j ++) {
-                            roll.clickButton({ Y : j, X : 0})
+                        if (roll.components[0]){
+                            for (let j = 0; j < roll.components[0].components.length; j ++) {
+                                roll.clickButton({ Y : j, X : 0})
+                            }
                         }
-                    }
+                	}
                 }
             } catch (e) {
-                console.error('Error message:', e);     
-                number += 1  
+                console.error('Error message:', e);
+                number += 1
             }
         }
         console.log('All messages sent successfully.');
