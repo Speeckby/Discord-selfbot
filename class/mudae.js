@@ -31,8 +31,9 @@ module.exports = class Mudae {
                 next_roll = 0
             } else {
                 next_roll = message.split("Prochain rolls reset dans ")[1].split("min.")[0].split("**")
-                next_roll = this.calcul_time(next_roll[1])
-                next_claim = next_roll/3600000
+                next_roll = this.calcul_time(next_roll[1])%3600000
+                next_claim = message.split("Le prochain reset est dans ")[1].split("min.")[0].split("**")
+                next_claim =  this.calcul_time(next_claim[1])/3600000
                 if (next_claim == 1 ) {
                     next_claim = 0
                 } else if (next_claim == 2 ) {
@@ -42,7 +43,6 @@ module.exports = class Mudae {
                 } else {
                     next_claim = Math.floor(next_claim)
                 }
-                next_roll = next_roll%3600000
             }
         }
         
@@ -126,16 +126,22 @@ module.exports = class Mudae {
 
     async rolls(number, client) {
         const channel = client.channels.cache.get(config.channel)
+        let liste = [undefined,0]
+
         for (let i = 0; i < number; i++) {
             try {
                 let roll = await channel.sendSlash('432610292342587392', 'ma');
+                console.log(i ,typeof roll)
+                if (roll.embeds[0] == undefined) {
+                    return ;
+                }
                 let value = parseInt(roll.embeds[0].description.split("\n")[3].split("**")[1]);
-				console.log(i ,typeof roll)
+				
                 if (value > 200 || roll.content != "") {
                     console.log('gg')
                     if (roll.components[0]){
                         for (let j = 0; j <= roll.components[0].components.length; j ++) {
-                        	roll.clickButton({ Y : j, X : 0})
+                        	roll.clickButton({ Y : 0, X : j})
                    	 	}
                     }
                 } else if (roll.embeds[0].footer) {
@@ -144,15 +150,23 @@ module.exports = class Mudae {
                         
                         if (roll.components[0]){
                             for (let j = 0; j < roll.components[0].components.length; j ++) {
-                                roll.clickButton({ Y : j, X : 0})
+                                roll.clickButton({ Y : 0, X : j})
                             }
                         }
                 	}
+                } else if (value > liste[1]) {
+                    liste = [roll, value]
                 }
             } catch (e) {
                 console.error('Error message:', e);
                 number += 1
             }
+        }
+        if (this.claim_reset == 0) {
+            liste[0].clickButton({ Y : 0, X : 0})
+            this.claim_reset == 2
+        } else {
+            this.claim_reset -= 1
         }
         console.log('All messages sent successfully.');
     }
