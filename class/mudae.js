@@ -32,7 +32,14 @@ module.exports = class Mudae {
             } else {
                 next_roll = message.split("Prochain rolls reset dans ")[1].split("min.")[0].split("**")
                 next_roll = this.calcul_time(next_roll[1])%3600000
-                next_claim = message.split("Le prochain reset est dans ")[1].split("min.")[0].split("**")
+                
+                if (message.includes("Le prochain reset est dans ")) {
+                    next_claim = message.split("Le prochain reset est dans ")[1].split("min.")[0].split("**")
+                    this.claim = false
+                } else { 
+                	next_claim = message.split("remarier : ")[1].split("min.")[0].split("**")
+                    this.claim = true
+                }
                 next_claim =  this.calcul_time(next_claim[1])/3600000
                 if (next_claim == 1 ) {
                     next_claim = 0
@@ -41,7 +48,7 @@ module.exports = class Mudae {
                 } else if (next_claim == 3) {
                     next_claim = 2
                 } else {
-                    next_claim = Math.floor(next_claim)
+                    next_claim = Math.floor(next_claim) -1
                 }
             }
         }
@@ -131,31 +138,42 @@ module.exports = class Mudae {
         for (let i = 0; i < number; i++) {
             try {
                 let roll = await channel.sendSlash('432610292342587392', 'ma');
+
                 console.log(i ,typeof roll)
+                
                 if (roll.embeds[0] == undefined) {
-                    return ;
-                }
-                let value = parseInt(roll.embeds[0].description.split("\n")[3].split("**")[1]);
+                    number = 0;
+                    
+                } else {
+                    let value = parseInt(roll.embeds[0].description.split("\n")[3].split("**")[1]);
 				
-                if (value > 200 || roll.content != "") {
-                    console.log('gg')
-                    if (roll.components[0]){
-                        for (let j = 0; j <= roll.components[0].components.length; j ++) {
-                        	roll.clickButton({ Y : 0, X : j})
-                   	 	}
-                    }
-                } else if (roll.embeds[0].footer) {
-                    if (roll.embeds[0].footer.iconURL) { // si react kakera 
-                        console.log('kakera')
-                        
+                    if (value > 200 || roll.content != "") {
+                        console.log('gg')
                         if (roll.components[0]){
                             for (let j = 0; j < roll.components[0].components.length; j ++) {
                                 roll.clickButton({ Y : 0, X : j})
                             }
+                            this.claim = true
                         }
-                	}
-                } else if (value > liste[1]) {
-                    liste = [roll, value]
+                    } else if (roll.embeds[0].footer) {
+                        if (roll.embeds[0].footer.iconURL) { // si react kakera 
+                            console.log('kakera')
+
+                            if (roll.components[0]){
+                                for (let j = 0; j < roll.components[0].components.length; j ++) {
+                                    roll.clickButton({ Y : 0, X : j})
+                                }
+                            }
+                        }else if (value > liste[1] & this.claim == false) {
+
+                        liste = [roll, value]
+                    	}  
+                    }else if (value > liste[1] & this.claim == false) {
+
+                        liste = [roll, value]
+                    }
+                    
+                    
                 }
             } catch (e) {
                 console.error('Error message:', e);
@@ -163,8 +181,11 @@ module.exports = class Mudae {
             }
         }
         if (this.claim_reset == 0) {
-            liste[0].clickButton({ Y : 0, X : 0})
-            this.claim_reset == 2
+            this.claim_reset = 2
+            if (this.claim == false ){
+                liste[0].clickButton({ Y : 0, X : 0})
+            }
+            this.claim = false
         } else {
             this.claim_reset -= 1
         }
