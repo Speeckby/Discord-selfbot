@@ -1,18 +1,17 @@
 const config = require("../config.json");
 
 module.exports = class Mudae {
-    constructor(message) {
-        this.channel = config.channel
-        let val = this.recuperer_infos(message)
+     constructor(message, client) {
+        let val = this.recuperer_infos(message, client)
         this.next_daily = val[0]
         this.next_poke = val[1]
         this.next_roll = val[2]
         this.claim_reset = val[3]
-        this.ordre = this.creer_ordre()
+        this.creer_ordre()
         this.time = Date.now()
     }
 
-    recuperer_infos(message) {
+    recuperer_infos(message, client) {
         let next_daily = false
         let next_poke = false
         let next_roll = false 
@@ -27,28 +26,48 @@ module.exports = class Mudae {
             }
         }
         if (config.mudae.autoclaim) {
-            if (message.includes("Vous avez **17** rolls restants.")) {
-                next_roll = 0
-            } else {
-                next_roll = message.split("Prochain rolls reset dans ")[1].split("min.")[0].split("**")
-                next_roll = this.calcul_time(next_roll[1])%3600000
+            if (config.mudae.channel_autoclaim.length == 0) {
+                console.log("Aucun salon spécifié pour l'auto-claim")
+            }else {
+                this.claim = {}
+                next_roll = {}
+                next_claim = {}
+                for (let i = 0; i < config.mudae.channel_autoclaim.length; i++) {
+                    let serv = config.mudae.channel_autoclaim[i]
+
+                    if (serv != config.channel) {
+                        const channel = client.channels.cache.get(serv)
+                        message = await channel.sendSlash('432610292342587392', 'tu');
+                        message = message.content
+                    }
+                    let roll2 = undefined
+                    let next_claim2 = undefined
+                    if (parseInt(message.split("Vous avez **")[1].split("**")[0]) != 0) {
+                        roll2 = 0
+                    } else {
+                        roll2 = message.split("Prochain rolls reset dans ")[1].split("min.")[0].split("**")
+                        roll2 = this.calcul_time(roll2[1])%3600000
+                    }   
+                    if (message.includes("Le prochain reset est dans ")) {
+                        next_claim2 = message.split("Le prochain reset est dans ")[1].split("min.")[0].split("**")
+                        this.claim[serv] = false
+                    } else { 
+                        next_claim2 = message.split("remarier : ")[1].split("min.")[0].split("**")
+                        this.claim[serv] = true
+                    }
+                    next_claim2 =  this.calcul_time(next_claim2[1])/3600000
+                    if (next_claim2 == 1 ) {
+                        next_claim2 = 0
+                    } else if (next_claim2 == 2 ) {
+                        next_claim2 = 1
+                    } else if (next_claim2 == 3 || Math.floor(next_claim2) == 0) {
+                        next_claim2 = 2
+                    } else  {
+                        next_claim2 = Math.floor(next_claim2) -1
+                    }
                 
-                if (message.includes("Le prochain reset est dans ")) {
-                    next_claim = message.split("Le prochain reset est dans ")[1].split("min.")[0].split("**")
-                    this.claim = false
-                } else { 
-                	next_claim = message.split("remarier : ")[1].split("min.")[0].split("**")
-                    this.claim = true
-                }
-                next_claim =  this.calcul_time(next_claim[1])/3600000
-                if (next_claim == 1 ) {
-                    next_claim = 0
-                } else if (next_claim == 2 ) {
-                    next_claim = 1
-                } else if (next_claim == 3) {
-                    next_claim = 2
-                } else {
-                    next_claim = Math.floor(next_claim) -1
+                    next_claim[serv] = next_claim2
+                    next_roll[serv] = roll2
                 }
             }
         }
@@ -75,17 +94,30 @@ module.exports = class Mudae {
         }
     }
 
-    creer_ordre(creer = false) {
-        if (creer == false) {
-            var ordre = [
-                { name : "roll", value: this.next_roll, function : (client) => this.roll(client)},
-                { name : "daily", value: this.next_daily, function : () => this.daily()},
-                { name : "pokemon", value: this.next_poke, function : () => this.pokemon()}
-            ].sort((a, b) => a.value - b.value);
-            return ordre
-        } else {
-            this.ordre.sort((a, b) => a.value - b.value);
-        }
+    creer_ordre() {
+        if (!this.ordre) {
+            var ordre = []
+
+            if (this.next_daily){
+                ordre.push({ name : "daily", value: this.next_daily, function : () => this.daily()})
+            }
+            if (this.next_poke) {
+                ordre.push({name : "pokemon", value: this.next_poke, function : () => this.pokemon()})
+            }
+            if (this.next_roll) {
+                for (let i = 0; i < config.mudae.channel_autoclaim.length; i++) {
+                    let serv = config.mudae.channel_autoclaim[i]
+                    ordre.push({ name : "roll", value: this.next_roll[serv], function : (client) => this.roll(client), serv : serv})
+                }
+            }
+            delete this.next_roll;
+            delete this.next_daily;
+            delete this.next_poke;
+            this.ordre = ordre
+        } 
+
+        this.ordre.sort((a, b) => a.value - b.value);
+        
     }
 
     verifier_timer(client) {
@@ -104,7 +136,7 @@ module.exports = class Mudae {
         }
         this.time = Date.now()
         this.ordre.push({ name: "daily", value: 72000000, function :() => this.daily()})
-        this.creer_ordre(true)
+        this.creer_ordre()
         return '$daily'
     }
 
@@ -115,7 +147,7 @@ module.exports = class Mudae {
         }
         this.time = Date.now()
         this.ordre.push({ name: "pokemon", value: 7200000, function :() => this.pokemon()})
-        this.creer_ordre(true)
+        this.creer_ordre()
         return '$p'
     }
 
@@ -126,7 +158,7 @@ module.exports = class Mudae {
         }
         this.time = Date.now()
         this.ordre.push({ name: "roll", value: 3600000, function :(client) => this.roll(client)})
-        this.creer_ordre(true)
+        this.creer_ordre()
         this.rolls(17, client)
         return ;
     }

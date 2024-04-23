@@ -56,7 +56,7 @@ const client = new Client({
 	},
 });
 
-client.login(process.env.TOKEN)
+client.login(process.env.SPIK)
 client.color = "#a14ca8"
 
 loadEvents(client)

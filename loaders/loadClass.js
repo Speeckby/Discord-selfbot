@@ -17,7 +17,7 @@ module.exports = async client => {
             }
         }
         tu = await send_tu()
-        client.class.mudae = await new Mudae(tu.content)
+        client.class.mudae = await new Mudae(tu.content,client)
         fn(client)
     }
 }
