@@ -1,17 +1,12 @@
 const config = require("../config.json");
 
 module.exports = class Mudae {
-     constructor(message, client) {
-        let val = this.recuperer_infos(message, client)
-        this.next_daily = val[0]
-        this.next_poke = val[1]
-        this.next_roll = val[2]
-        this.claim_reset = val[3]
-        this.creer_ordre()
+     constructor(message) {
+        this.recuperer_infos(message)
         this.time = Date.now()
     }
 
-    recuperer_infos(message, client) {
+    recuperer_infos(message) {
         let next_daily = false
         let next_poke = false
         let next_roll = false 
@@ -32,14 +27,8 @@ module.exports = class Mudae {
                 this.claim = {}
                 next_roll = {}
                 next_claim = {}
-                for (let i = 0; i < config.mudae.channel_autoclaim.length; i++) {
-                    let serv = config.mudae.channel_autoclaim[i]
-
-                    if (serv != config.channel) {
-                        const channel = client.channels.cache.get(serv)
-                        message = await channel.sendSlash('432610292342587392', 'tu');
-                        message = message.content
-                    }
+                if (config.mudae.channel_autoclaim.includes(config.channel)) {
+                    
                     let roll2 = undefined
                     let next_claim2 = undefined
                     if (parseInt(message.split("Vous avez **")[1].split("**")[0]) != 0) {
@@ -50,10 +39,10 @@ module.exports = class Mudae {
                     }   
                     if (message.includes("Le prochain reset est dans ")) {
                         next_claim2 = message.split("Le prochain reset est dans ")[1].split("min.")[0].split("**")
-                        this.claim[serv] = false
+                        this.claim[config.channel] = false
                     } else { 
                         next_claim2 = message.split("remarier : ")[1].split("min.")[0].split("**")
-                        this.claim[serv] = true
+                        this.claim[config.channel] = true
                     }
                     next_claim2 =  this.calcul_time(next_claim2[1])/3600000
                     if (next_claim2 == 1 ) {
@@ -66,8 +55,8 @@ module.exports = class Mudae {
                         next_claim2 = Math.floor(next_claim2) -1
                     }
                 
-                    next_claim[serv] = next_claim2
-                    next_roll[serv] = roll2
+                    next_claim[config.channel] = next_claim2
+                    next_roll[config.channel] = roll2
                 }
             }
         }
@@ -81,10 +70,43 @@ module.exports = class Mudae {
             }
         }
         
-
-        return [ next_daily, next_poke, next_roll, next_claim ]
+        this.next_daily = next_daily
+        this.next_poke = next_poke
+        this.next_roll = next_roll
+        this.claim_reset = next_claim
     }
     
+    ajouter_serv(serv,message) {
+        let roll2 = undefined
+        let next_claim2 = undefined
+        if (parseInt(message.split("Vous avez **")[1].split("**")[0]) != 0) {
+            roll2 = 0
+        } else {
+            roll2 = message.split("Prochain rolls reset dans ")[1].split("min.")[0].split("**")
+            roll2 = this.calcul_time(roll2[1])%3600000
+        }   
+        if (message.includes("Le prochain reset est dans ")) {
+            next_claim2 = message.split("Le prochain reset est dans ")[1].split("min.")[0].split("**")
+            this.claim[serv] = false
+        } else { 
+            next_claim2 = message.split("remarier : ")[1].split("min.")[0].split("**")
+            this.claim[serv] = true
+        }
+        next_claim2 =  this.calcul_time(next_claim2[1])/3600000
+        if (next_claim2 == 1 ) {
+            next_claim2 = 0
+        } else if (next_claim2 == 2 ) {
+            next_claim2 = 1
+        } else if (next_claim2 == 3 || Math.floor(next_claim2) == 0) {
+            next_claim2 = 2
+        } else  {
+            next_claim2 = Math.floor(next_claim2) -1
+        }
+    
+        this.claim_reset[serv] = next_claim2
+        this.next_roll[serv] = roll2
+    }
+
     calcul_time(time) {
         if (isNaN(time)) {
             time = time.split("h ")
@@ -98,13 +120,13 @@ module.exports = class Mudae {
         if (!this.ordre) {
             var ordre = []
 
-            if (this.next_daily){
+            if (config.mudae.daily){
                 ordre.push({ name : "daily", value: this.next_daily, function : () => this.daily()})
             }
-            if (this.next_poke) {
+            if (config.mudae.poke) {
                 ordre.push({name : "pokemon", value: this.next_poke, function : () => this.pokemon()})
             }
-            if (this.next_roll) {
+            if (config.mudae.autoclaim) {
                 for (let i = 0; i < config.mudae.channel_autoclaim.length; i++) {
                     let serv = config.mudae.channel_autoclaim[i]
                     ordre.push({ name : "roll", value: this.next_roll[serv], function : (client) => this.roll(client), serv : serv})
@@ -152,27 +174,26 @@ module.exports = class Mudae {
     }
 
     roll(client) {
+        let serv = this.ordre[0].serv
         this.ordre.splice(0, 1)
         for (let i=0; i<this.ordre.length; i++) {
             this.ordre[i]["value"] -=  Date.now() - this.time
         }
         this.time = Date.now()
-        this.ordre.push({ name: "roll", value: 3600000, function :(client) => this.roll(client)})
+        this.ordre.push({ name: "roll", value: 3600000, function :(client) => this.roll(client), serv : serv})
         this.creer_ordre()
-        this.rolls(17, client)
+        this.rolls(17, client, serv)
         return ;
     }
 
-    async rolls(number, client) {
-        const channel = client.channels.cache.get(config.channel)
+    async rolls(number, client, serv) {
+        const channel = client.channels.cache.get(serv)
         let liste = [undefined,0]
 
         for (let i = 0; i < number; i++) {
             try {
                 let roll = await channel.sendSlash('432610292342587392', 'ma');
-
-                console.log(i ,typeof roll)
-                
+                                
                 if (roll.embeds[0] == undefined) {
                     number = 0;
                     
@@ -180,27 +201,27 @@ module.exports = class Mudae {
                     let value = parseInt(roll.embeds[0].description.split("\n")[3].split("**")[1]);
 				
                     if (value > 200 || roll.content != "") {
-                        console.log('gg')
+                        console.log('gg', serv)
                         if (roll.components[0]){
                             for (let j = 0; j < roll.components[0].components.length; j ++) {
                                 roll.clickButton({ Y : 0, X : j})
                             }
-                            this.claim = true
+                            this.claim[serv] = true
                         }
                     } else if (roll.embeds[0].footer) {
                         if (roll.embeds[0].footer.iconURL) { // si react kakera 
-                            console.log('kakera')
+                            console.log('kakera', serv)
 
                             if (roll.components[0]){
                                 for (let j = 0; j < roll.components[0].components.length; j ++) {
                                     roll.clickButton({ Y : 0, X : j})
                                 }
                             }
-                        }else if (value > liste[1] & this.claim == false) {
+                        }else if (value > liste[1] & this.claim[serv] == false) {
 
                         liste = [roll, value]
                     	}  
-                    }else if (value > liste[1] & this.claim == false) {
+                    }else if (value > liste[1] & this.claim[serv] == false) {
 
                         liste = [roll, value]
                     }
@@ -212,15 +233,15 @@ module.exports = class Mudae {
                 number += 1
             }
         }
-        if (this.claim_reset == 0) {
-            this.claim_reset = 2
-            if (this.claim == false ){
+        if (this.claim_reset[serv] == 0) {
+            this.claim_reset[serv] = 2
+            if (this.claim[serv] == false ){
                 liste[0].clickButton({ Y : 0, X : 0})
             }
-            this.claim = false
+            this.claim[serv] = false
         } else {
-            this.claim_reset -= 1
+            this.claim_reset[serv] -= 1
         }
-        console.log('All messages sent successfully.');
+        console.log(number, 'rolls effectués.');
     }
 }

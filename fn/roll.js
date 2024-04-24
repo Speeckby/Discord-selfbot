@@ -1,11 +1,11 @@
 const config = require("../config.json");
 
-function verifier_timers(client) {
-    let b = client.class.mudae.verifier_timer(client) 
+async function  verifier_timers(client) {
+    let b = await client.class.mudae.verifier_timer(client) 
     if (isNaN(b) & b != undefined) {
       const channel = client.channels.cache.get(config.channel)
-      channel.send(b)
-      return verifier_timers(client)
+      await channel.send(b)
+      return await verifier_timers(client)
     } else if (b == undefined) {
       return 0
     } else {
