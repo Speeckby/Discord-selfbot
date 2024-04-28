@@ -42,16 +42,18 @@ module.exports = class Mudae {
                         this.claim[config.channel] = false
                     } else { 
                         next_claim2 = message.split("remarier : ")[1].split("min.")[0].split("**")
-                        this.claim[config.channel] = true
+                        this.claim[config.channel] = false
                     }
                     next_claim2 =  this.calcul_time(next_claim2[1])/3600000
                     if (next_claim2 == 1 ) {
                         next_claim2 = 0
                     } else if (next_claim2 == 2 ) {
                         next_claim2 = 1
-                    } else if (next_claim2 == 3 || Math.floor(next_claim2) == 0) {
+                    } else if (next_claim2 == 3 || (Math.floor(next_claim2) == 0 & roll2 != 0)) {
                         next_claim2 = 2
-                    } else  {
+                    } else if (roll2 == 0) {
+                        next_claim2 = Math.floor(next_claim2) 
+                    } else {
                         next_claim2 = Math.floor(next_claim2) -1
                     }
                 
@@ -97,9 +99,11 @@ module.exports = class Mudae {
             next_claim2 = 0
         } else if (next_claim2 == 2 ) {
             next_claim2 = 1
-        } else if (next_claim2 == 3 || Math.floor(next_claim2) == 0) {
+        } else if (next_claim2 == 3 || (Math.floor(next_claim2) == 0 & roll2 != 0)) {
             next_claim2 = 2
-        } else  {
+        } else  if (roll2 == 0) {
+            next_claim2 = Math.floor(next_claim2)
+        } else {
             next_claim2 = Math.floor(next_claim2) -1
         }
     
@@ -182,7 +186,7 @@ module.exports = class Mudae {
         this.time = Date.now()
         this.ordre.push({ name: "roll", value: 3600000, function :(client) => this.roll(client), serv : serv})
         this.creer_ordre()
-        this.rolls(17, client, serv)
+        this.rolls(18, client, serv)
         return ;
     }
 
@@ -193,40 +197,40 @@ module.exports = class Mudae {
         for (let i = 0; i < number; i++) {
             try {
                 let roll = await channel.sendSlash('432610292342587392', 'ma');
-                                
+                               
                 if (roll.embeds[0] == undefined) {
                     number = 0;
                     
                 } else {
+					let react = true;
                     let value = parseInt(roll.embeds[0].description.split("\n")[3].split("**")[1]);
-				
-                    if (value > 200 || roll.content != "") {
-                        console.log('gg', serv)
-                        if (roll.components[0]){
-                            for (let j = 0; j < roll.components[0].components.length; j ++) {
-                                roll.clickButton({ Y : 0, X : j})
-                            }
-                            this.claim[serv] = true
-                        }
-                    } else if (roll.embeds[0].footer) {
+
+                    if (roll.embeds[0].footer) {
                         if (roll.embeds[0].footer.iconURL) { // si react kakera 
                             console.log('kakera', serv)
-
+                            react = false 
                             if (roll.components[0]){
                                 for (let j = 0; j < roll.components[0].components.length; j ++) {
-                                    roll.clickButton({ Y : 0, X : j})
+                                    await roll.clickButton({ Y : 0, X : j})
                                 }
                             }
                         }else if (value > liste[1] & this.claim[serv] == false) {
 
                         liste = [roll, value]
                     	}  
-                    }else if (value > liste[1] & this.claim[serv] == false) {
+                    }
+                    if ((value > 200 || roll.content != "") & react) {
+                        console.log('200 gg', serv, react)
+                        if (roll.components[0]){
+                            for (let j = 0; j < roll.components[0].components.length; j ++) {
+                                await roll.clickButton({ Y : 0, X : j})
+                            }
+                            this.claim[serv] = true
+                        }
+                    } else if (value > liste[1] & this.claim[serv] == false) {
 
                         liste = [roll, value]
                     }
-                    
-                    
                 }
             } catch (e) {
                 console.error('Error message:', e);
@@ -235,8 +239,9 @@ module.exports = class Mudae {
         }
         if (this.claim_reset[serv] == 0) {
             this.claim_reset[serv] = 2
-            if (this.claim[serv] == false ){
-                liste[0].clickButton({ Y : 0, X : 0})
+            if (this.claim[serv] == false) {
+                console.log('e')
+                await liste[0].clickButton({ Y : 0, X : 0})
             }
             this.claim[serv] = false
         } else {
