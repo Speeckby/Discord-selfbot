@@ -1,6 +1,6 @@
 const config = require("../config.json")
 module.exports = async (client, reaction) => {
-	if (reaction.message.content == "$rt" & config.mudae.autoclaim.includes(reaction.message.channelId) & reaction._emoji.name == '✅') {
+	if (reaction.message.content == "$rt" & config.mudae.channel_autoclaim.includes(reaction.message.channelId) & reaction._emoji.name == '✅') {
 
         reaction.fetch()
 

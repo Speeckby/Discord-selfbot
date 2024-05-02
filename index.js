@@ -32,7 +32,8 @@ text('Discord - Selfbot', {
 const {Client, Options} = require('discord.js-selfbot-v13')
 require('dotenv').config()
 
-const loadEvents = require("./loaders/loadEvents.js")
+const loadEvents = require("./loaders/loadEvents.js");
+const loadCommands = require("./loaders/loadCommands.js");
 
 const client = new Client({
     makeCache: Options.cacheWithLimits({
@@ -56,7 +57,8 @@ const client = new Client({
 	},
 });
 
-client.login(process.env.SPIK)
+client.login(process.env.TOKEN)
 client.color = "#a14ca8"
 
 loadEvents(client)
+loadCommands(client)

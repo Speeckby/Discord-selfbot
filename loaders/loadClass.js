@@ -18,11 +18,13 @@ module.exports = async client => {
         }
         tu = await send_tu(channel)
         client.class.mudae = await new Mudae(tu.content)
-        for (let serv of config.mudae.channel_autoclaim) {
-            if (serv != config.channel) {
-                const channel = client.channels.cache.get(serv) 
-                message = await send_tu(channel)
-                client.class.mudae.ajouter_serv(serv,message.content)
+        if (config.mudae.autoclaim) {
+            for (let serv of config.mudae.channel_autoclaim) {
+                if (serv != config.channel) {
+                    const channel = client.channels.cache.get(serv) 
+                    message = await send_tu(channel)
+                    client.class.mudae.ajouter_serv(serv,message.content)
+                }
             }
         }
         client.class.mudae.creer_ordre()

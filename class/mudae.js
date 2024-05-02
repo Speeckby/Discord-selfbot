@@ -42,7 +42,7 @@ module.exports = class Mudae {
                         this.claim[config.channel] = false
                     } else { 
                         next_claim2 = message.split("remarier : ")[1].split("min.")[0].split("**")
-                        this.claim[config.channel] = false
+                        this.claim[config.channel] = true
                     }
                     next_claim2 =  this.calcul_time(next_claim2[1])/3600000
                     if (next_claim2 == 1 ) {
@@ -51,6 +51,7 @@ module.exports = class Mudae {
                         next_claim2 = 1
                     } else if (next_claim2 == 3 || (Math.floor(next_claim2) == 0 & roll2 != 0)) {
                         next_claim2 = 2
+                        this.claim[config.channel] = false
                     } else if (roll2 == 0) {
                         next_claim2 = Math.floor(next_claim2) 
                     } else {
@@ -101,6 +102,7 @@ module.exports = class Mudae {
             next_claim2 = 1
         } else if (next_claim2 == 3 || (Math.floor(next_claim2) == 0 & roll2 != 0)) {
             next_claim2 = 2
+            this.claim[serv] = false
         } else  if (roll2 == 0) {
             next_claim2 = Math.floor(next_claim2)
         } else {
@@ -240,7 +242,6 @@ module.exports = class Mudae {
         if (this.claim_reset[serv] == 0) {
             this.claim_reset[serv] = 2
             if (this.claim[serv] == false) {
-                console.log('e')
                 await liste[0].clickButton({ Y : 0, X : 0})
             }
             this.claim[serv] = false
