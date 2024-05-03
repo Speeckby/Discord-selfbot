@@ -205,7 +205,7 @@ module.exports = class Mudae {
                     
                 } else {
 					let react = true;
-                    let value = parseInt(roll.embeds[0].description.split("\n")[3].split("**")[1]);
+                    let value = parseInt(roll.embeds[0].description.split("\n")[roll.embeds[0].description.split("\n").length -1].split("**")[1]);
 
                     if (roll.embeds[0].footer) {
                         if (roll.embeds[0].footer.iconURL) { // si react kakera 
