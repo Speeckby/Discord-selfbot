@@ -79,9 +79,10 @@ module.exports = class Mudae {
         this.claim_reset = next_claim
     }
     
-    ajouter_serv(serv,message) {
+    ajouter_serv(serv, message) {
         let roll2 = undefined
         let next_claim2 = undefined
+
         if (parseInt(message.split("Vous avez **")[1].split("**")[0]) != 0) {
             roll2 = 0
         } else {
@@ -108,8 +109,13 @@ module.exports = class Mudae {
         } else {
             next_claim2 = Math.floor(next_claim2) -1
         }
-    
+
         this.claim_reset[serv] = next_claim2
+
+        if (!this.next_roll) {
+            return roll2
+        }
+
         this.next_roll[serv] = roll2
     }
 
