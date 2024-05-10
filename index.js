@@ -55,9 +55,12 @@ const client = new Client({
 			filter: () => user => user.bot && user.id !== user.client.user.id, // Remove all bots.
 		},
 	},
+    presence : false
+    
 });
 
 client.login(process.env.TOKEN)
+
 client.color = "#a14ca8"
 
 loadEvents(client)

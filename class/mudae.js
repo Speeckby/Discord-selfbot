@@ -218,24 +218,29 @@ module.exports = class Mudae {
                             console.log('kakera', serv)
                             react = false 
                             if (roll.components[0]){
+                                
                                 for (let j = 0; j < roll.components[0].components.length; j ++) {
-                                    await roll.clickButton({ Y : 0, X : j})
+                                    console.log('button')
+                                    console.log(await roll.clickButton({ Y : 0, X : j}))
                                 }
                             }
-                        }else if (value > liste[1] & this.claim[serv] == false) {
+                        }else if (value > liste[1] & !this.claim[serv]) {
 
-                        liste = [roll, value]
+                            liste = [roll, value]
                     	}  
                     }
-                    if ((value > 200 || roll.content != "") & react) {
+                    if ((value > 0 || roll.content != "") & react) {
                         console.log('200 gg', serv, react)
-                        if (roll.components[0]){
+                        if (roll.components[0]) {
                             for (let j = 0; j < roll.components[0].components.length; j ++) {
-                                await roll.clickButton({ Y : 0, X : j})
+                                console.log('button')
+                                let a = await roll.clickButton({ Y : 0, X : j})
+                                console.log(a)
+                                return ;
                             }
                             this.claim[serv] = true
                         }
-                    } else if (value > liste[1] & this.claim[serv] == false) {
+                    } else if (value > liste[1] & !this.claim[serv]) {
 
                         liste = [roll, value]
                     }
@@ -247,7 +252,7 @@ module.exports = class Mudae {
         }
         if (this.claim_reset[serv] == 0) {
             this.claim_reset[serv] = 2
-            if (this.claim[serv] == false) {
+            if (!this.claim[serv]) {
                 await liste[0].clickButton({ Y : 0, X : 0})
             }
             this.claim[serv] = false
