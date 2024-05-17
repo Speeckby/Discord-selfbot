@@ -5,6 +5,9 @@
         "daily": false,
         "poke": false,
         "autoclaim": false,
-        "channel_autoclaim": []
+        "channel_autoclaim": [],
+        "stats": {
+            
+        }
     }
 }

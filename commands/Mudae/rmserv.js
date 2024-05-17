@@ -43,7 +43,8 @@ module.exports = {
             }
             client.class.mudae.creer_ordre()
 
-            config.mudae.channel_autoclaim.splice(serv,1)
+            const index = config.mudae.channel_autoclaim.indexOf(serv);
+            config.mudae.channel_autoclaim.splice(index,1)
 
             fn.update(config)
                 

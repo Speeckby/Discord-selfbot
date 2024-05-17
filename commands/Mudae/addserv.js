@@ -1,4 +1,3 @@
-const fs = require('fs');
 const fn = require('../../fn/config');
 
 async function send_tu(channel) {
@@ -51,9 +50,10 @@ module.exports = {
             }
 
 
+            if (!channel) return console.log("sus");
             let tu = await send_tu(channel)
             let info = client.class.mudae.ajouter_serv(serv, tu.content)
-            client.class.mudae.ordre.push({ name : "roll", value: info - (Date.now() - client.class.mudae.time), function : (client) =>  client.class.mudae.roll(client), serv : serv})
+            client.class.mudae.ordre.push({ name : "roll", value: info + (Date.now() - client.class.mudae.time), function : (client) =>  client.class.mudae.roll(client), serv : serv})
             client.class.mudae.creer_ordre()
 
             config.mudae.channel_autoclaim.push(serv)
