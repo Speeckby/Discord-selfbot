@@ -1,10 +1,13 @@
 {
-    "channel" : "1099737720026300576",
-    "mudae" : {
-        "on" :  true,
-        "daily" : true,
-        "poke" : true,
-        "autoclaim" : true,
-        "channel_autoclaim" : ["1099737720026300576"]
+    "channel": "",
+    "mudae": {
+        "on": false,
+        "daily": false,
+        "poke": false,
+        "autoclaim": false,
+        "channel_autoclaim": [],
+        "stats": {
+            
+        }
     }
 }

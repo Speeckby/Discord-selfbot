@@ -1,4 +1,5 @@
 const config = require("../config.json");
+const fn = require('../fn/config');
 
 module.exports = class Mudae {
      constructor(message) {
@@ -77,11 +78,23 @@ module.exports = class Mudae {
         this.next_poke = next_poke
         this.next_roll = next_roll
         this.claim_reset = next_claim
+
+
+        // Gestion du fichier config 
+
+        const config_file = fn.get();
+
+        if (!config_file.mudae.stats[config.channel]) {
+            config_file.mudae.stats[config.channel] = {poke : 0, rolls : 0, kakera_claim : 0, kakera_react : 0, nb_claim : 0, nb_wishs : 0, nb_roll_reset : 0}
+
+            fn.update(config_file)
+        }
     }
     
-    ajouter_serv(serv,message) {
+    ajouter_serv(serv, message) {
         let roll2 = undefined
         let next_claim2 = undefined
+
         if (parseInt(message.split("Vous avez **")[1].split("**")[0]) != 0) {
             roll2 = 0
         } else {
@@ -108,9 +121,23 @@ module.exports = class Mudae {
         } else {
             next_claim2 = Math.floor(next_claim2) -1
         }
-    
+
         this.claim_reset[serv] = next_claim2
+
+        const config_file = fn.get();
+
+        if (!config_file.mudae.stats[serv]) {
+            config_file.mudae.stats[serv] = {poke : 0, rolls : 0, kakera_claim : 0, kakera_react : 0, nb_claim : 0, nb_wishs : 0, nb_roll_reset : 0}
+
+            fn.update(config_file)
+        }
+
+        if (!this.next_roll) {
+            return roll2
+        }
+
         this.next_roll[serv] = roll2
+
     }
 
     calcul_time(time) {
@@ -158,6 +185,12 @@ module.exports = class Mudae {
     }
 
     daily() {
+        let config_file = fn.get()
+
+        config_file.mudae.stats.nb_roll_reset ++
+
+        fn.update(config_file)
+
         this.ordre.splice(0, 1)
         for (let i=0; i<this.ordre.length; i++) {
             this.ordre[i]["value"] -=  Date.now() - this.time
@@ -169,6 +202,12 @@ module.exports = class Mudae {
     }
 
     pokemon() {
+        let config_file = fn.get()
+
+        config_file.mudae.stats.poke ++
+
+        fn.update(config_file)
+
         this.ordre.splice(0, 1)
         for (let i=0; i<this.ordre.length; i++) {
             this.ordre[i]["value"] -=  Date.now() - this.time
@@ -188,66 +227,92 @@ module.exports = class Mudae {
         this.time = Date.now()
         this.ordre.push({ name: "roll", value: 3600000, function :(client) => this.roll(client), serv : serv})
         this.creer_ordre()
-        this.rolls(18, client, serv)
+        this.rolls(client, serv)
         return ;
     }
 
-    async rolls(number, client, serv) {
+    async rolls(client, serv) {
+
+        const config_file = fn.get();
+
         const channel = client.channels.cache.get(serv)
         let liste = [undefined,0]
 
-        for (let i = 0; i < number; i++) {
+        let i = 0;
+        while (i != -1) {
+            i++
             try {
                 let roll = await channel.sendSlash('432610292342587392', 'ma');
                                
                 if (roll.embeds[0] == undefined) {
-                    number = 0;
+                    i = -1;
                     
                 } else {
-					let react = true;
-                    let value = parseInt(roll.embeds[0].description.split("\n")[3].split("**")[1]);
+                    let value = parseInt(roll.embeds[0].description.split("\n")[roll.embeds[0].description.split("\n").length -1].split("**")[1]);
 
-                    if (roll.embeds[0].footer) {
-                        if (roll.embeds[0].footer.iconURL) { // si react kakera 
-                            console.log('kakera', serv)
-                            react = false 
-                            if (roll.components[0]){
-                                for (let j = 0; j < roll.components[0].components.length; j ++) {
-                                    await roll.clickButton({ Y : 0, X : j})
-                                }
-                            }
-                        }else if (value > liste[1] & this.claim[serv] == false) {
-
-                        liste = [roll, value]
-                    	}  
-                    }
-                    if ((value > 200 || roll.content != "") & react) {
-                        console.log('200 gg', serv, react)
+                    if (roll.embeds[0].footer?.iconURL) {
+                        console.log('kakera', serv)
                         if (roll.components[0]){
+                            
+                            for (let j = 0; j < roll.components[0].components.length; j ++) {
+                                console.log('button')
+                                console.log(await roll.clickButton({ Y : 0, X : j}))
+                            }
+                        } 
+                    }
+                    if (roll.content != "") {
+
+                        console.log('wish')
+
+                        if (roll.components[0]) { // si bouton
+
+                            if (!this.claim[serv]) {
+                                await channel.send('$rt')
+                                config_file.mudae.stats[serv].kakera_claim += value
+                                config_file.mudae.stats[serv].nb_wishs ++
+                                config_file.mudae.stats[serv].nb_claim ++
+                            }
+
                             for (let j = 0; j < roll.components[0].components.length; j ++) {
                                 await roll.clickButton({ Y : 0, X : j})
                             }
+
                             this.claim[serv] = true
                         }
-                    } else if (value > liste[1] & this.claim[serv] == false) {
+                    } else if (value > liste[1] & !this.claim[serv]) {
 
                         liste = [roll, value]
                     }
+                    
+                    config_file.mudae.stats[serv].rolls ++
                 }
             } catch (e) {
                 console.error('Error message:', e);
-                number += 1
+                i ++
             }
         }
+
+        // Si le personnage le plus cher roll est à plus de 200 kakeras alors le claim
+        if (!this.claim[serv] & liste[1] > 200) { 
+            await liste[0].clickButton({ Y : 0, X : 0})
+            this.claim[serv] = true
+            config_file.mudae.stats[serv].kakera_claim += liste[1]
+            config_file.mudae.stats[serv].nb_claim ++
+        }
+
         if (this.claim_reset[serv] == 0) {
             this.claim_reset[serv] = 2
-            if (this.claim[serv] == false) {
+            
+            if (!this.claim[serv]) {
+                config_file.mudae.stats[serv].kakera_claim += liste[1]
+                config_file.mudae.stats[serv].nb_claim ++
                 await liste[0].clickButton({ Y : 0, X : 0})
             }
+
             this.claim[serv] = false
         } else {
             this.claim_reset[serv] -= 1
         }
-        console.log(number, 'rolls effectués.');
+        fn.update(config_file)
     }
 }
