@@ -9,6 +9,7 @@
   "author": "speeckby",
   "license": "MIT",
   "dependencies": {
+    "@actions/github": "^6.0.0",
     "colors": "^1.4.0",
     "discord.js-selfbot-v13": "^3.1.4",
     "dotenv": "^16.3.1",
