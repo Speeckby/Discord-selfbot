@@ -6,8 +6,6 @@ module.exports = async (client, message) => {
             if (client.commands[command] != undefined) {
                 client.commands[command][0].run(client, message)
             }
-        }else if (message.content.indexOf("$restart") == 0) {
-            client.stop("restart")
         }
     }
     

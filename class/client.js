@@ -1,7 +1,8 @@
 const {Client} = require('discord.js-selfbot-v13')
 const {readdirSync} = require('fs');
 const { blue } = require("colors");
-const update = require('./update.js')
+const update = require('../update.js')
+
 module.exports = class Selfbot extends Client {
     constructor(color = "#a14ca8", prefix = "-") {
         super();
@@ -33,7 +34,7 @@ module.exports = class Selfbot extends Client {
             const commands = readdirSync(`./commands/${dir}/`).filter(file => file.endsWith(".js"));
         
             for (let file of commands) {
-                let pull = require(`./commands/${dir}/${file}`);
+                let pull = require(`../commands/${dir}/${file}`);
         
                 if (pull.name) {
                     this.commands[pull.name] = [pull, dir];
@@ -48,7 +49,7 @@ module.exports = class Selfbot extends Client {
             .filter(f => f.endsWith(".js"))
             .forEach(async file => {
         
-                let event = require(`./events/${file}`)
+                let event = require(`../events/${file}`)
         
                 this.on(file.split('.js').join(''), event.bind(null, this))
         

@@ -18,7 +18,7 @@ module.exports = {
 
         if (serv == undefined) {
             message.react('❌')
-            message.reply('Veuillez préciser un salon : ``-addserv <mention ou id du salon à ajouter>``')
+            message.reply('Veuillez préciser un salon : ``-rmserv <mention ou id du salon à ajouter>``')
             return ; 
         } 
 
@@ -51,7 +51,7 @@ module.exports = {
             message.react('✅')
         } else {
             message.react('❌')
-            message.reply('Veuillez spécifier un salon en second paramètre : ``-addserv <mention ou id du salon à ajouter>``')
+            message.reply('Veuillez spécifier un salon en second paramètre : ``-rmserv <mention ou id du salon à ajouter>``')
         }
         
     }

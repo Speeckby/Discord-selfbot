@@ -154,10 +154,10 @@ module.exports = class Mudae {
             var ordre = []
 
             if (config.mudae.daily){
-                ordre.push({ name : "daily", value: this.next_daily, function : () => this.daily()})
+                ordre.push({ name : "daily", value: this.next_daily, function : (client) => this.daily(client)})
             }
             if (config.mudae.poke) {
-                ordre.push({name : "pokemon", value: this.next_poke, function : () => this.pokemon()})
+                ordre.push({name : "pokemon", value: this.next_poke, function : (client) => this.pokemon(client)})
             }
             if (config.mudae.autoclaim) {
                 for (let i = 0; i < config.mudae.channel_autoclaim.length; i++) {
@@ -175,16 +175,13 @@ module.exports = class Mudae {
         
     }
 
-    verifier_timer(client) {
+    timers(client) {
         if (this.time + this.ordre[0].value < Date.now()) {
-            return this.ordre[0].function(client)
-        } 
-        else {
-            return this.ordre[0].value
+            this.ordre[0].function(client)
         }
     }
 
-    daily() {
+    daily(client) {
         let config_file = fn.get()
 
         config_file.mudae.stats.nb_roll_reset ++
@@ -198,10 +195,11 @@ module.exports = class Mudae {
         this.time = Date.now()
         this.ordre.push({ name: "daily", value: 72000000, function :() => this.daily()})
         this.creer_ordre()
-        return '$daily'
+        const channel = client.channels.cache.get(config.channel)
+        channel.send('$daily')
     }
 
-    pokemon() {
+    pokemon(client) {
         let config_file = fn.get()
 
         config_file.mudae.stats.poke ++
@@ -215,9 +213,10 @@ module.exports = class Mudae {
         this.time = Date.now()
         this.ordre.push({ name: "pokemon", value: 7200000, function :() => this.pokemon()})
         this.creer_ordre()
-        return '$p'
+        const channel = client.channels.cache.get(config.channel)
+        channel.send('$p')
     }
-
+    
     roll(client) {
         let serv = this.ordre[0].serv
         this.ordre.splice(0, 1)
@@ -228,7 +227,6 @@ module.exports = class Mudae {
         this.ordre.push({ name: "roll", value: 3600000, function :(client) => this.roll(client), serv : serv})
         this.creer_ordre()
         this.rolls(client, serv)
-        return ;
     }
 
     async rolls(client, serv) {
@@ -255,7 +253,6 @@ module.exports = class Mudae {
                         if (roll.components[0]){
                             
                             for (let j = 0; j < roll.components[0].components.length; j ++) {
-                                console.log('button')
                                 await roll.clickButton({ Y : 0, X : j})
                             }
                         } 
