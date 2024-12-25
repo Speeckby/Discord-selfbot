@@ -1,7 +1,6 @@
 const github = require('@actions/github'),
     fs = require('fs'), path = require('path'),
     octokit = github.getOctokit(process.env.GITHUB_TOKEN),
-    package = require('./package.json'),
     { green } = require('colors'),
     dontDelete = ["node_modules", ".env", "config.json", "package-lock.json", "start.js"];
 
@@ -56,6 +55,7 @@ async function fetchVersion() {
 
 module.exports = async () => {
     try {
+        const package = require('./package.json');
         let new_version = await fetchVersion();
         if (new_version > package.version) {
             console.log(green(`Nouvelle version disponible : ↑ ${new_version} ↑`))
@@ -74,8 +74,10 @@ module.exports = async () => {
             process.stdout.write(green(`\rInstallation de la nouvelle version... 100% `))
             console.log()
             console.log(green(`Mise à jour terminée !`))
+            delete require.cache[require.resolve('./package.json')];
             return true
         } else {
+            delete require.cache[require.resolve('./package.json')];
             return false
         }
 

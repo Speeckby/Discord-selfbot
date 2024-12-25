@@ -256,11 +256,10 @@ module.exports = class Mudae {
                             
                             for (let j = 0; j < roll.components[0].components.length; j ++) {
                                 console.log('button')
-                                console.log(await roll.clickButton({ Y : 0, X : j}))
+                                await roll.clickButton({ Y : 0, X : j})
                             }
                         } 
-                    }
-                    if (roll.content != "") {
+                    } else if (roll.content != "") {
 
                         console.log('wish')
 
@@ -279,8 +278,9 @@ module.exports = class Mudae {
 
                             this.claim[serv] = true
                         }
+                    } else if (roll.embeds[0].description.split("\n")[0] == "Christmas Art Contest 2024 - React") {
+                        await roll.clickButton({ Y : 0, X : 0})
                     } else if (value > liste[1] & !this.claim[serv]) {
-
                         liste = [roll, value]
                     }
                     

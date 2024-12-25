@@ -46,7 +46,6 @@ async function main() {
     while (message != "stop") {
         if (message == "restart") {
             delete require.cache[require.resolve('./index.js')];
-            delete require.cache[require.resolve('./managers/uptimerobot')];
             console.log("Restarting...");
         }
         let Selfbot = require('./index.js');
