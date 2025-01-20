@@ -2,24 +2,27 @@
 
 ##  Par Speeckby
 
-# Fiche de route : 
-## Fonctionnalités disponibles : 
+### <strong>I don't take any responsibility for blocked Discord accounts that used this selfbot.</strong>
+### <strong>Using this is prohibited by the [Discord TOS](https://discord.com/terms) and can lead to the account block.</strong>
+
+# Road map : 
+## Available features: 
 
 * Mudae :
   * $p auto ✅
   * $daily auto ✅
   * Auto roll ⁉️
-  * Gestion de plusieurs serveurs ✅
+  * management of multiple servers ✅
 
-## Fonctionnalités futures :
+## Unavailable features :
 
 * Mudae : 
   * Auto $rt
-  * Detection auto du nombre de rolls
-* Koya aventure 
+  * Rolls number detection
+* Koya adventure 
 * 🤫
 
-## Bugs connus : 
+## Known bugs : 
 
-* Ram utilisée en constante augmentation ⚠️ (Start = 100 Mib --> 500 Mib en 2 jours)
-* Erreur lors du roll de Mudae-chan
+* Infinite ram increase ⚠️ (Start = 100 Mib --> 500 Mib in 2 days)
+* Error when Mudae-chan is rolled

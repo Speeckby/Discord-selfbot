@@ -1,3 +1,5 @@
+require('dotenv').config({ path: "./.env" });
+
 // Import necessary modules for system information
 const { text } = require("figlet");
 const { loadavg, cpus, totalmem } = require("os");
@@ -6,7 +8,7 @@ const { loadavg, cpus, totalmem } = require("os");
 const serviceUPTIMEROBOT = require('./managers/uptimerobot');
 const app = require('express')();
 serviceUPTIMEROBOT(app);
-app.listen(process.env.PORT, () => {});
+let server = app.listen(process.env.PORT, () => {});
 
 // Handle uncaught exceptions and promise rejections
 process.on("unhandledRejection", (e) => { console.error(e); });
@@ -41,28 +43,40 @@ text('Discord - Selfbot', { font: "Standard" }, function (err, data) {
     });
 });
 
-/**
- * Main function to start the selfbot
- */
+// Run the main function
+const { spawn } = require('child_process');
 
-require('dotenv').config({ path: "./.env" });
-let message;
+let child;
 
-async function main() {
-    while (message != "stop") {
-        
-        if (message == "restart") {
-            console.log("Restarting...");
-        }
-        // Load and start the Selfbot
-        let Selfbot = require('./class/client.js');
-        Selfbot = new Selfbot();
-        message = await Selfbot.start();
 
-        delete Selfbot;
-        delete require.cache;
-    }
+function restartOtherFile() {
+  // Lancer le processus du fichier `otherFile.js`
+  child = spawn('node', ['index.js'], {
+    stdio: ['inherit', 'inherit', 'inherit', 'ipc'], // Partager les flux d'entrée/sortie avec le parent
+  });
 }
 
-// Run the main function
+async function main() {
+    while (true) {
+        restartOtherFile();
+        let Promesse = new Promise((resolve, reject) => {
+            child.on('message', (message) => {
+                if(message == 'restart') {
+                    console.log('Restarting...')
+                    child.kill();
+                    resolve('restart');
+                } else if (message == 'stop') {
+                    console.log('Stopping...')
+                    child.kill();
+                    server.close();
+                    resolve('stop');
+                }
+              });
+        })
+        let message = await Promesse;
+        if (message == 'stop') {
+            break;
+        }
+    }
+}
 main();

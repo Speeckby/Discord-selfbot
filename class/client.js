@@ -1,7 +1,7 @@
 const {Client} = require('discord.js-selfbot-v13')
 const {readdirSync} = require('fs');
 const { blue } = require("colors");
-const update = require('../update.js')
+const update = require('../update.js');
 
 module.exports = class Selfbot extends Client {
     constructor(color = "#a14ca8", prefix = "-") {

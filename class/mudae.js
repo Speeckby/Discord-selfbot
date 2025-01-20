@@ -127,7 +127,7 @@ module.exports = class Mudae {
         const config_file = fn.get();
 
         if (!config_file.mudae.stats[serv]) {
-            config_file.mudae.stats[serv] = {poke : 0, rolls : 0, kakera_claim : 0, kakera_react : 0, nb_claim : 0, nb_wishs : 0, nb_roll_reset : 0}
+            config_file.mudae.stats[serv] = {rolls : 0, kakera_claim : 0, kakera_react : 0, nb_claim : 0, nb_wishs : 0, nb_roll_reset : 0}
 
             fn.update(config_file)
         }
@@ -172,7 +172,6 @@ module.exports = class Mudae {
         } 
 
         this.ordre.sort((a, b) => a.value - b.value);
-        
     }
 
     timers(client) {
@@ -193,7 +192,7 @@ module.exports = class Mudae {
             this.ordre[i]["value"] -=  Date.now() - this.time
         }
         this.time = Date.now()
-        this.ordre.push({ name: "daily", value: 72000000, function :() => this.daily()})
+        this.ordre.push({ name: "daily", value: 72000000, function :(client) => this.daily(client)})
         this.creer_ordre()
         const channel = client.channels.cache.get(config.channel)
         channel.send('$daily')
@@ -211,7 +210,7 @@ module.exports = class Mudae {
             this.ordre[i]["value"] -=  Date.now() - this.time
         }
         this.time = Date.now()
-        this.ordre.push({ name: "pokemon", value: 7200000, function :() => this.pokemon()})
+        this.ordre.push({ name: "pokemon", value: 7200000, function :(client) => this.pokemon(client)})
         this.creer_ordre()
         const channel = client.channels.cache.get(config.channel)
         channel.send('$p')
